@@ -1,0 +1,50 @@
+Sub CopyFiles()
+
+    Dim sourcePath As String
+    Dim destPath As String
+    Dim fileName As Range
+    Dim count As Integer
+    Dim errorCount As Integer
+    
+    errorCount = 0
+    count = Range(C1).Value 'FileName count placeholder
+    sourcePath = Range(C2).Value
+    destPath = Range(C3).Value
+    
+    'Clear old Error List
+    Columns(Fh).Delete
+    Range(F1).Value = Not Found Error#  File  Full Path
+    
+    Set fileName = Range(A2).Resize(count) ' holds all files in the range in a list
+    Dim c As Range
+    On Error Resume Next 'If error will skip to the next interation of the loop.
+    Dim file As String
+    Dim fileError As String
+    Dim filePathError As String
+    For Each c In fileName 'will parse through each file in the range. s will be the placeholder for the file.
+        
+        'MsgBox (c)
+        file = c 'this is a long way of converting the value of c to string for use in the filepath.
+        fileError = file
+        Dim myFile As Object
+        'Define the file object variable to store the file for trasnport.
+        Set myFile = CreateObject(Scripting.FileSystemObject)
+        ' Copy files  Call myFile.CopyFile(SourceFilePathand file.txt, destination folder path ending with, True)
+        filePathError = sourcePath & file
+        'MsgBox (opening  & filePathError)
+        Call myFile.CopyFile(sourcePath & file, destPath, True)
+        If Err.Number  0 Then ' when error is hit the next loop is started.
+            'MsgBox (Error opening  & filePathError)
+            errorCount = errorCount + 1
+            Cells(errorCount + 1, 6).Value = Err
+            Cells(errorCount + 1, 7).Value = fileError
+            Cells(errorCount + 1, 8).Value = filePathError
+            Err.Number = 0 'clears the error cache
+        End If
+    Next c
+If errorCount  1 Then
+    'MsgBox (CStr(errorCount) +  files could not be found.)
+Else
+    'MsgBox (CStr(errorCount) +  file could not be found.)
+End If
+End Sub
